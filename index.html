@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUSH</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 38'%3E%3Crect width='38' height='38' rx='10' fill='%234f46e5'/%3E%3Cpath d='M19 10L27 21H21.5V29H16.5V21H11L19 10Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3730a3;
+            --primary-light: #4f46e5;
+            --primary-lighter: #6366f1;
+            --bg: #f3f4f8;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --success: #10b981;
+            --success-dark: #059669;
+            --error: #ef4444;
+            --error-dark: #dc2626;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --info: #3b82f6;
+            --info-dark: #1d4ed8;
+            --radius: 14px;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 12px 32px rgba(55, 48, 163, 0.14);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(1200px 400px at 10% -10%, rgba(99, 102, 241, 0.10), transparent),
+                radial-gradient(1000px 500px at 100% 0%, rgba(59, 130, 246, 0.08), transparent),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ---------- Header ---------- */
+        .header {
+            background: linear-gradient(120deg, var(--primary) 0%, var(--primary-light) 55%, var(--primary-lighter) 100%);
+            color: white;
+            padding: 22px 32px;
+            box-shadow: 0 4px 24px rgba(55, 48, 163, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header .brand { display: flex; align-items: center; gap: 12px; }
+        .header .brand .logo {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 11px;
+        }
+        .header .brand .logo svg { width: 22px; height: 22px; }
+        .header h1 { font-size: 21px; font-weight: 800; letter-spacing: 0.04em; }
+        .header .subtitle { font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 400; margin-top: 1px; }
+        .back-btn {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 9px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover { background-color: rgba(255, 255, 255, 0.28); transform: translateY(-1px); }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.4s ease;
+        }
+        .page-title h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+        .page-title p { color: var(--text-muted); margin-top: 6px; font-size: 14.5px; }
+
+        /* ---------- Auth gate ---------- */
+        .auth-wrap {
+            max-width: 380px;
+            margin: 60px auto 0;
+            animation: fadeInUp 0.4s ease;
+        }
+        .auth-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 36px 32px;
+            text-align: center;
+        }
+        .auth-card .icon-circle { margin-bottom: 18px; }
+        .auth-card h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+        .auth-card p { color: var(--text-muted); font-size: 13.5px; margin-bottom: 24px; }
+        .auth-field { text-align: left; margin-bottom: 14px; }
+        .auth-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .auth-field input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: #fafafb;
+            transition: border-color 0.2s;
+        }
+        .auth-field input:hover,
+        .auth-field input:focus { border-color: var(--primary-lighter); outline: none; }
+        .auth-error {
+            font-size: 12.5px;
+            color: var(--error-dark);
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+        .auth-submit {
+            width: 100%;
+            background: linear-gradient(120deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            margin-top: 6px;
+            box-shadow: 0 4px 14px rgba(55, 48, 163, 0.28);
+            transition: all 0.2s ease;
+        }
+        .auth-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(55, 48, 163, 0.35); }
+        .auth-submit:disabled { opacity: 0.6; cursor: default; transform: none; }
+        .signout-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12.5px;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .signout-btn:hover { color: white; text-decoration: underline; }
+
+        /* ---------- Flow selector ---------- */
+        .flow-selector {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.5s ease;
+        }
+        .flow-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 36px 32px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            min-width: 250px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+            font-family: inherit;
+        }
+        .flow-button:hover {
+            border-color: var(--primary-lighter);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .flow-button .icon-wrap {
+            width: 64px; height: 64px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            border-radius: 16px;
+            font-size: 30px;
+        }
+        .flow-button .title { font-size: 17px; font-weight: 700; color: var(--text); }
+        .flow-button .description { font-size: 13.5px; color: var(--text-muted); text-align: center; }
+
+        /* ---------- Content card ---------- */
+        .content {
+            background-color: var(--card-bg);
+            padding: 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.35s ease;
+        }
+        .hidden { display: none !important; }
+
+        .flow-info { margin-bottom: 26px; }
+        .flow-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .flow-info p { color: var(--text-muted); font-size: 14px; }
+
+        .group-selector { margin-bottom: 26px; }
+        .group-selector label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13.5px; color: var(--text); }
+        .select-wrap { position: relative; }
+        .select-wrap::after {
+            content: '';
+            position: absolute; right: 16px; top: 50%;
+            width: 8px; height: 8px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: translateY(-70%) rotate(45deg);
+            pointer-events: none;
+        }
+        .group-selector select {
+            width: 100%;
+            padding: 12px 40px 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            appearance: none;
+            background-color: #fafafb;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .group-selector select:hover,
+        .group-selector select:focus { border-color: var(--primary-lighter); outline: none; }
+
+        /* ---------- Dropzone ---------- */
+        .dropzone {
+            border: 2px dashed #cbd0dc;
+            border-radius: var(--radius);
+            padding: 48px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background-color: #fafbfd;
+        }
+        .dropzone:hover { border-color: var(--primary-lighter); background-color: #f4f6ff; }
+        .dropzone.active { border-color: var(--primary-lighter); background-color: #eef1ff; transform: scale(1.01); }
+        .dropzone input { display: none; }
+        .dropzone .icon-circle {
+            width: 68px; height: 68px;
+            margin: 0 auto 14px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            border-radius: 50%;
+            font-size: 30px;
+            transition: transform 0.25s ease;
+        }
+        .dropzone:hover .icon-circle { transform: scale(1.06); }
+        .dropzone p { margin: 4px 0; }
+        .main-text { font-size: 15.5px; font-weight: 600; color: var(--text); }
+        .sub-text { font-size: 13px; color: var(--text-muted); }
+
+        .template-info {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            font-size: 13px;
+            margin-top: 22px;
+            color: var(--text-muted);
+        }
+        .template-info h4 { margin-bottom: 8px; color: var(--text); font-size: 13px; font-weight: 700; }
+        .template-info code {
+            background-color: white;
+            border: 1px solid var(--border);
+            padding: 2px 7px;
+            border-radius: 5px;
+            color: #be185d;
+            font-size: 12.5px;
+        }
+
+        /* ---------- Preview stage ---------- */
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .preview-filename { font-size: 15px; font-weight: 700; color: var(--text); }
+        .preview-count { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .link-btn {
+            background: none;
+            border: none;
+            color: var(--primary-light);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            padding: 4px 0;
+        }
+        .link-btn:hover { text-decoration: underline; }
+        .preview-table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-height: 340px;
+            overflow: auto;
+        }
+        .preview-table-wrap table { font-size: 12.5px; }
+        .preview-table-wrap thead th {
+            position: sticky; top: 0;
+            background-color: #f9fafb;
+        }
+        .preview-more-note {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .preview-warning {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #78350f;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        .preview-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .secondary-btn {
+            background: white;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+            padding: 12px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .secondary-btn:hover { border-color: #b8bcc6; background-color: #fafafb; }
+
+        /* ---------- Results ---------- */
+        .results h2 { margin-bottom: 22px; font-size: 20px; font-weight: 700; }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 22px 16px;
+            border-radius: 14px;
+            color: white;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .card.success { background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%); }
+        .card.error { background: linear-gradient(135deg, var(--error) 0%, var(--error-dark) 100%); }
+        .card.warning { background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%); }
+        .card.info { background: linear-gradient(135deg, var(--info) 0%, var(--info-dark) 100%); }
+        .card .count { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+        .card .label { font-size: 12.5px; opacity: 0.92; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
+
+        .detail-block { margin-top: 28px; }
+        .detail-block h3 {
+            font-size: 14.5px;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-radius: 10px 10px 0 0;
+            border-left: 4px solid transparent;
+        }
+        .detail-block.success-block h3 { background: #f0fdf6; color: #065f46; border-color: var(--success); }
+        .detail-block.warning-block h3 { background: #fffbeb; color: #78350f; border-color: var(--warning); }
+        .detail-block.error-block h3 { background: #fef2f2; color: #7f1d1d; border-color: var(--error); }
+        .detail-block.info-block h3 { background: #eff6ff; color: #1e3a8a; border-color: var(--info); }
+
+        .table-wrap { border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background-color: #f9fafb; }
+        th { padding: 11px 14px; text-align: left; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); }
+        td { padding: 11px 14px; border-bottom: 1px solid #f1f2f4; color: var(--text-muted); }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: #fafbff; }
+        .mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11.5px; color: #be185d; }
+
+        .loading { text-align: center; padding: 48px; }
+        .spinner {
+            display: inline-block;
+            width: 38px; height: 38px;
+            border: 3.5px solid #e5e7eb;
+            border-top-color: var(--primary-lighter);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .loading p { margin-top: 14px; color: var(--text-muted); font-size: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+        .reset-btn {
+            background: linear-gradient(120deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            margin-top: 24px;
+            box-shadow: 0 4px 14px rgba(55, 48, 163, 0.28);
+            transition: all 0.2s ease;
+        }
+        .reset-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(55, 48, 163, 0.35); }
+
+        /* ---------- Toasts (replaces alert()) ---------- */
+        .toast-stack {
+            position: fixed;
+            top: 20px; right: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+            z-index: 999;
+        }
+        .toast {
+            min-width: 260px;
+            max-width: 360px;
+            background: white;
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--error);
+            font-size: 13.5px;
+            color: var(--text);
+            animation: slideIn 0.25s ease;
+        }
+        .toast.warn { border-color: var(--warning); }
+
+        @media (max-width: 600px) {
+            .header { padding: 16px 20px; }
+            .container { padding: 32px 16px 60px; }
+            .flow-button { min-width: 100%; }
+            .summary-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <div class="logo">
+                <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 10L27 21H21.5V29H16.5V21H11L19 10Z" fill="white"/>
+                </svg>
+            </div>
+            <div>
+                <h1>PUSH</h1>
+                <div class="subtitle">Bulk user &amp; group provisioning for Okta</div>
+            </div>
+        </div>
+        <button class="signout-btn hidden" id="signoutBtn" onclick="signOut()">Sign out</button>
+        <button class="back-btn" id="backBtn" style="display: none;" onclick="reset()">← Back</button>
+    </div>
+
+    <div class="container">
+        <!-- Auth Gate -->
+        <div id="authGate">
+            <div class="auth-wrap">
+                <div class="auth-card">
+                    <div class="icon-circle" style="margin: 0 auto 18px;">🔒</div>
+                    <h2>Sign in to PUSH</h2>
+                    <p>Enter your access credentials to continue</p>
+                    <div id="authError" class="auth-error hidden"></div>
+                    <form id="authForm" onsubmit="attemptLogin(event)">
+                        <div class="auth-field">
+                            <label for="authUsername">Username</label>
+                            <input type="text" id="authUsername" autocomplete="username" required>
+                        </div>
+                        <div class="auth-field">
+                            <label for="authPassword">Password</label>
+                            <input type="password" id="authPassword" autocomplete="current-password" required>
+                        </div>
+                        <button type="submit" class="auth-submit" id="authSubmitBtn">Unlock</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow Selector -->
+        <div id="flowSelector" class="hidden">
+            <div class="page-title">
+                <h2>What would you like to do?</h2>
+                <p>Choose an import type to get started</p>
+            </div>
+            <div class="flow-selector">
+                <button class="flow-button" onclick="selectFlow('new-users')">
+                    <span class="icon-wrap">👥</span>
+                    <span class="title">New User Onboarding</span>
+                    <span class="description">Create new users in Okta from a CSV</span>
+                </button>
+                <button class="flow-button" onclick="selectFlow('group-assignment')">
+                    <span class="icon-wrap">🧩</span>
+                    <span class="title">Add to Group</span>
+                    <span class="description">Add existing users to a group in bulk</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Import Content -->
+        <div id="importContent" class="hidden">
+            <div class="content">
+                <div class="flow-info">
+                    <h2 id="flowTitle"></h2>
+                    <p id="flowDesc"></p>
+                </div>
+
+                <div id="groupSelector" class="group-selector hidden">
+                    <label for="groupSelect">Select Group</label>
+                    <div class="select-wrap">
+                        <select id="groupSelect">
+                            <option value="">-- Choose a group --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="uploadStage">
+                    <div class="dropzone" id="dropzone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+                        <span class="icon-circle" id="dropzoneIcon">📁</span>
+                        <p class="main-text" id="dropzoneMain">Drag and drop your CSV file here</p>
+                        <p class="sub-text" id="dropzoneSub">or click to select a file</p>
+                    </div>
+
+                    <div class="template-info">
+                        <h4>📋 Template Information</h4>
+                        <div id="templateInfo"></div>
+                    </div>
+                </div>
+
+                <div id="previewStage" class="hidden">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-filename" id="previewFilename"></div>
+                            <div class="preview-count" id="previewCount"></div>
+                        </div>
+                        <button class="link-btn" onclick="cancelPreview()">Choose a different file</button>
+                    </div>
+                    <div class="preview-table-wrap">
+                        <table id="previewTable"></table>
+                    </div>
+                    <div id="previewMoreNote" class="preview-more-note hidden"></div>
+                    <div id="previewWarning" class="preview-warning hidden"></div>
+                    <div class="preview-actions">
+                        <button class="secondary-btn" onclick="cancelPreview()">Cancel</button>
+                        <button class="reset-btn" id="confirmBtn" onclick="confirmImport()">Confirm &amp; Provision →</button>
+                    </div>
+                </div>
+
+                <div id="loadingDiv" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Processing your file&hellip;</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsContent" class="hidden">
+            <div class="content results">
+                <h2>Import Results</h2>
+                <div class="summary-cards" id="summaryCards"></div>
+                <div id="detailsSection"></div>
+                <button class="reset-btn" onclick="reset()">Start New Import</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-stack" id="toastStack"></div>
+
+    <script>
+        let currentFlow = null;
+        let groups = [];
+
+        function showToast(message, type) {
+            const stack = document.getElementById('toastStack');
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (type === 'warn' ? ' warn' : '');
+            toast.textContent = message;
+            stack.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s ease';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4200);
+        }
+
+        // ---------- Auth gate ----------
+        // The backend requires HTTP Basic Auth on every endpoint that can read
+        // or write Okta data. This app has no server-side session, so the
+        // credentials (as a pre-built "Basic <base64>" header) are held in
+        // sessionStorage for the tab's lifetime and attached to every request.
+        const AUTH_STORAGE_KEY = 'push_auth_header';
+        let authHeader = sessionStorage.getItem(AUTH_STORAGE_KEY);
+
+        async function authFetch(url, options = {}) {
+            const headers = Object.assign({}, options.headers, { 'Authorization': authHeader });
+            const response = await fetch(url, Object.assign({}, options, { headers }));
+            if (response.status === 401) {
+                sessionStorage.removeItem(AUTH_STORAGE_KEY);
+                authHeader = null;
+                showAuthGate('Session expired - please sign in again.');
+            }
+            return response;
+        }
+
+        function showAuthGate(errorMessage) {
+            document.getElementById('authGate').classList.remove('hidden');
+            document.getElementById('flowSelector').classList.add('hidden');
+            document.getElementById('importContent').classList.add('hidden');
+            document.getElementById('resultsContent').classList.add('hidden');
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('signoutBtn').classList.add('hidden');
+            const errEl = document.getElementById('authError');
+            if (errorMessage) {
+                errEl.textContent = errorMessage;
+                errEl.classList.remove('hidden');
+            } else {
+                errEl.classList.add('hidden');
+            }
+        }
+
+        function showApp() {
+            document.getElementById('authGate').classList.add('hidden');
+            document.getElementById('flowSelector').classList.remove('hidden');
+            document.getElementById('signoutBtn').classList.remove('hidden');
+        }
+
+        async function attemptLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('authUsername').value;
+            const password = document.getElementById('authPassword').value;
+            const candidate = 'Basic ' + btoa(username + ':' + password);
+            const submitBtn = document.getElementById('authSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in…';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/groups', {
+                    headers: { 'Authorization': candidate }
+                });
+                if (response.status === 401) {
+                    document.getElementById('authError').textContent = 'Invalid username or password';
+                    document.getElementById('authError').classList.remove('hidden');
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    authHeader = candidate;
+                    sessionStorage.setItem(AUTH_STORAGE_KEY, authHeader);
+                    groups = data.groups;
+                    populateGroups();
+                    showApp();
+                } else {
+                    showToast('Login check failed: ' + (data.detail || 'unknown error'));
+                }
+            } catch (error) {
+                showToast('Could not reach the backend: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Unlock';
+            }
+        }
+
+        function signOut() {
+            sessionStorage.removeItem(AUTH_STORAGE_KEY);
+            authHeader = null;
+            reset();
+            showAuthGate();
+            document.getElementById('authForm').reset();
+        }
+
+        async function init() {
+            if (!authHeader) {
+                showAuthGate();
+                return;
+            }
+            try {
+                const response = await authFetch('http://localhost:8000/api/groups');
+                const data = await response.json();
+                if (data.success) {
+                    groups = data.groups;
+                    populateGroups();
+                    showApp();
+                }
+            } catch (error) {
+                console.error('Error fetching groups:', error);
+                showToast('Could not reach the backend: ' + error.message);
+            }
+        }
+
+        function populateGroups() {
+            const select = document.getElementById('groupSelect');
+            // Remove everything except the placeholder option before repopulating -
+            // populateGroups() can run again after sign-in/sign-out, and appending
+            // without clearing first duplicates every group in the list.
+            select.querySelectorAll('option[data-group]').forEach(opt => opt.remove());
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.name;
+                option.textContent = group.name;
+                option.dataset.group = 'true';
+                select.appendChild(option);
+            });
+        }
+
+        function selectFlow(flow) {
+            currentFlow = flow;
+            document.getElementById('flowSelector').classList.add('hidden');
+            document.getElementById('importContent').classList.remove('hidden');
+            document.getElementById('backBtn').style.display = 'block';
+            pendingFile = null;
+            document.getElementById('previewStage').classList.add('hidden');
+            document.getElementById('uploadStage').classList.remove('hidden');
+            resetDropzone();
+
+            if (flow === 'new-users') {
+                document.getElementById('flowTitle').textContent = 'New User Onboarding';
+                document.getElementById('flowDesc').textContent = 'Upload a CSV file to create new users in Okta';
+                document.getElementById('groupSelector').classList.add('hidden');
+                document.getElementById('templateInfo').innerHTML = `
+                    <p>Required columns: <code>login</code>, <code>firstName</code>, <code>lastName</code>, <code>email</code><br>
+                    Optional columns: middleName, title, phone, department, etc.</p>
+                `;
+            } else {
+                document.getElementById('flowTitle').textContent = 'Add Existing Users to Group';
+                document.getElementById('flowDesc').textContent = 'Upload a CSV file with user emails to add them to a group';
+                document.getElementById('groupSelector').classList.remove('hidden');
+                document.getElementById('templateInfo').innerHTML = `
+                    <p>Required column: <code>userIdOrLogin</code> (user email)</p>
+                `;
+            }
+
+            document.getElementById('dropzone').onclick = () => document.getElementById('fileInput').click();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.add('active');
+        }
+
+        function handleDragLeave(e) {
+            document.getElementById('dropzone').classList.remove('active');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelected(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelected(e.target.files[0]);
+            }
+        }
+
+        function resetDropzone() {
+            document.getElementById('dropzoneIcon').textContent = '📁';
+            document.getElementById('dropzoneMain').textContent = 'Drag and drop your CSV file here';
+            document.getElementById('dropzoneSub').textContent = 'or click to select a file';
+        }
+
+        // --- Lightweight client-side CSV parsing, used only to render the preview.
+        // The original file is still sent to the backend for the actual import,
+        // which does its own (more complete) CSV parsing.
+        function splitCSVLine(line) {
+            const result = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') { inQuotes = !inQuotes; continue; }
+                if (ch === ',' && !inQuotes) { result.push(cur.trim()); cur = ''; continue; }
+                cur += ch;
+            }
+            result.push(cur.trim());
+            return result;
+        }
+
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+            if (lines.length === 0) return { headers: [], rows: [] };
+            const headers = splitCSVLine(lines[0]);
+            const rows = lines.slice(1).map(splitCSVLine);
+            return { headers, rows };
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[ch]);
+        }
+
+        // Marks a string as pre-built, already-safe HTML so block() below
+        // doesn't escape it a second time. Everything else passed into block()
+        // is escaped by default - required because table cells can contain
+        // attacker-controlled values straight out of an uploaded CSV.
+        function raw(html) {
+            return { __raw: html };
+        }
+
+        let pendingFile = null;
+
+        const REQUIRED_COLUMNS = {
+            'new-users': ['login', 'firstName', 'lastName', 'email'],
+            'group-assignment': ['userIdOrLogin']
+        };
+
+        async function handleFileSelected(file) {
+            if (currentFlow === 'group-assignment' && !document.getElementById('groupSelect').value) {
+                showToast('Please select a group first', 'warn');
+                return;
+            }
+
+            let text;
+            try {
+                text = await file.text();
+            } catch (error) {
+                showToast('Could not read file: ' + error.message);
+                return;
+            }
+
+            const { headers, rows } = parseCSV(text);
+
+            if (rows.length === 0) {
+                showToast('That CSV has no data rows', 'warn');
+                return;
+            }
+
+            const required = REQUIRED_COLUMNS[currentFlow] || [];
+            const missing = required.filter(col => !headers.includes(col));
+            if (missing.length > 0) {
+                showToast('Missing required column(s): ' + missing.join(', '), 'warn');
+                return;
+            }
+
+            pendingFile = file;
+            renderPreview(headers, rows, file.name);
+            document.getElementById('uploadStage').classList.add('hidden');
+            document.getElementById('previewStage').classList.remove('hidden');
+        }
+
+        function renderPreview(headers, rows, filename) {
+            document.getElementById('previewFilename').textContent = filename;
+            document.getElementById('previewCount').textContent =
+                rows.length + (rows.length === 1 ? ' row' : ' rows') + ' ready to provision';
+
+            const maxShow = 100;
+            const shown = rows.slice(0, maxShow);
+            const thead = '<thead><tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr></thead>';
+            const tbody = '<tbody>' + shown.map(r =>
+                '<tr>' + headers.map((_, i) => `<td>${escapeHtml(r[i] || '')}</td>`).join('') + '</tr>'
+            ).join('') + '</tbody>';
+            document.getElementById('previewTable').innerHTML = thead + tbody;
+
+            const noteEl = document.getElementById('previewMoreNote');
+            if (rows.length > maxShow) {
+                noteEl.textContent = `Showing first ${maxShow} of ${rows.length} rows - all ${rows.length} will be provisioned on confirm.`;
+                noteEl.classList.remove('hidden');
+            } else {
+                noteEl.classList.add('hidden');
+            }
+
+            const warnEl = document.getElementById('previewWarning');
+            if (currentFlow === 'group-assignment') {
+                const groupName = document.getElementById('groupSelect').value;
+                warnEl.innerHTML = `⚠️ <span>These ${rows.length} user(s) will be added to <strong>${escapeHtml(groupName)}</strong>. Review the list above before confirming.</span>`;
+            } else {
+                warnEl.innerHTML = `⚠️ <span>This will create ${rows.length} new user(s) in Okta. Review the list above before confirming.</span>`;
+            }
+            warnEl.classList.remove('hidden');
+        }
+
+        function cancelPreview() {
+            pendingFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewStage').classList.add('hidden');
+            document.getElementById('uploadStage').classList.remove('hidden');
+            resetDropzone();
+        }
+
+        async function confirmImport() {
+            if (!pendingFile) return;
+
+            document.getElementById('previewStage').classList.add('hidden');
+            document.getElementById('loadingDiv').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', pendingFile);
+
+            try {
+                let endpoint = '';
+                if (currentFlow === 'new-users') {
+                    endpoint = 'http://localhost:8000/api/import/users';
+                } else {
+                    endpoint = 'http://localhost:8000/api/import/groups';
+                    formData.append('group_name', document.getElementById('groupSelect').value);
+                }
+
+                const response = await authFetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.status === 401) {
+                    // authFetch already surfaced the auth gate; just reset local state.
+                    pendingFile = null;
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('loadingDiv').classList.add('hidden');
+
+                if (data.success) {
+                    pendingFile = null;
+                    displayResults(data.results);
+                } else {
+                    document.getElementById('previewStage').classList.remove('hidden');
+                    showToast('Import failed: ' + data.detail);
+                }
+            } catch (error) {
+                document.getElementById('loadingDiv').classList.add('hidden');
+                document.getElementById('previewStage').classList.remove('hidden');
+                showToast('Error uploading file: ' + error.message);
+            }
+        }
+
+        function displayResults(results) {
+            document.getElementById('importContent').classList.add('hidden');
+            document.getElementById('resultsContent').classList.remove('hidden');
+
+            let summaryHTML = '';
+            if (currentFlow === 'new-users') {
+                summaryHTML = `
+                    <div class="card success"><span class="count">${results.created.length}</span><span class="label">Created</span></div>
+                    <div class="card warning"><span class="count">${results.duplicates.length}</span><span class="label">Duplicates</span></div>
+                    <div class="card error"><span class="count">${results.errors.length}</span><span class="label">Errors</span></div>
+                    <div class="card info"><span class="count">${results.total}</span><span class="label">Total</span></div>
+                `;
+            } else {
+                summaryHTML = `
+                    <div class="card success"><span class="count">${results.added.length}</span><span class="label">Added</span></div>
+                    <div class="card info"><span class="count">${results.already_member.length}</span><span class="label">Already Member</span></div>
+                    <div class="card warning"><span class="count">${results.not_found.length}</span><span class="label">Not Found</span></div>
+                    <div class="card error"><span class="count">${results.errors.length}</span><span class="label">Errors</span></div>
+                `;
+            }
+            document.getElementById('summaryCards').innerHTML = summaryHTML;
+
+            let detailsHTML = '';
+            if (currentFlow === 'new-users') {
+                if (results.created.length > 0) {
+                    detailsHTML += block('success', '✓', 'Created Users', results.created.length,
+                        ['Email', 'User ID'],
+                        results.created.map(i => [i.email, raw(`<span class="mono">${escapeHtml(i.user_id)}</span>`)]));
+                }
+                if (results.duplicates.length > 0) {
+                    detailsHTML += block('warning', '⚠', 'Duplicates', results.duplicates.length,
+                        ['Row', 'Email'],
+                        results.duplicates.map(i => [i.row, i.email]));
+                }
+            } else {
+                if (results.added.length > 0) {
+                    detailsHTML += block('success', '✓', 'Added to Group', results.added.length,
+                        ['Email'],
+                        results.added.map(i => [i.email]));
+                }
+                if (results.already_member.length > 0) {
+                    detailsHTML += block('info', 'ℹ', 'Already Member', results.already_member.length,
+                        ['Email'],
+                        results.already_member.map(i => [i.email]));
+                }
+                if (results.not_found.length > 0) {
+                    detailsHTML += block('warning', '⚠', 'Not Found', results.not_found.length,
+                        ['Row', 'Email'],
+                        results.not_found.map(i => [i.row, i.email]));
+                }
+            }
+
+            if (results.errors.length > 0) {
+                detailsHTML += block('error', '✗', 'Errors', results.errors.length,
+                    ['Row', 'Email', 'Error'],
+                    results.errors.map(i => [i.row, i.email, i.message]));
+            }
+
+            document.getElementById('detailsSection').innerHTML = detailsHTML;
+        }
+
+        function block(type, icon, title, count, headers, rows) {
+            const thead = headers.map(h => `<th>${escapeHtml(h)}</th>`).join('');
+            const tbody = rows.map(r => `<tr>${r.map(c => {
+                const cell = (c && typeof c === 'object' && '__raw' in c) ? c.__raw : escapeHtml(c);
+                return `<td>${cell}</td>`;
+            }).join('')}</tr>`).join('');
+            return `
+                <div class="detail-block ${type}-block">
+                    <h3>${icon} ${title} (${count})</h3>
+                    <div class="table-wrap">
+                        <table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function reset() {
+            currentFlow = null;
+            pendingFile = null;
+            document.getElementById('flowSelector').classList.remove('hidden');
+            document.getElementById('importContent').classList.add('hidden');
+            document.getElementById('resultsContent').classList.add('hidden');
+            document.getElementById('previewStage').classList.add('hidden');
+            document.getElementById('uploadStage').classList.remove('hidden');
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            resetDropzone();
+        }
+
+        init();
+    </script>
+</body>
+</html>

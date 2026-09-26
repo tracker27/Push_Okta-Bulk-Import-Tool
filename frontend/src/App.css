@@ -1,0 +1,151 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.header {
+  background-color: #003d82;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.back-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.flow-selector {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.flow-selector h2 {
+  font-size: 24px;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.flow-buttons {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flow-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 30px;
+  background-color: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 250px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.flow-button:hover {
+  border-color: #003d82;
+  box-shadow: 0 4px 12px rgba(0, 61, 130, 0.15);
+  transform: translateY(-2px);
+}
+
+.flow-button .icon {
+  font-size: 48px;
+}
+
+.flow-button .title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.flow-button .description {
+  font-size: 14px;
+  color: #666;
+}
+
+.content {
+  flex: 1;
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.flow-info {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.flow-info h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.flow-info p {
+  margin: 0;
+  color: #666;
+}
+
+.group-selector {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.group-selector label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.group-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.group-selector select:focus {
+  outline: none;
+  border-color: #003d82;
+  box-shadow: 0 0 0 3px rgba(0, 61, 130, 0.1);
+}

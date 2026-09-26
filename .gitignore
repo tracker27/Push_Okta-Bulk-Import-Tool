@@ -15,6 +15,9 @@ backend_error.txt
 frontend_log.txt
 frontend_error.txt
 
+# Local dev-tool config (Claude Code preview server, absolute local paths)
+.claude/
+
 # Frontend
 node_modules/
 build/

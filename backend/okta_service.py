@@ -11,6 +11,7 @@ class OktaService:
         self.client_secret = os.getenv("OKTA_CLIENT_SECRET")
         self.private_key_jwk = os.getenv("OKTA_PRIVATE_KEY")
         self.access_token = None
+        self.auth_method = None  # "jwt" | "client_secret" | "ssws" - drives token refresh on 401
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -28,25 +29,51 @@ class OktaService:
                 print("[OktaService] Attempting OAuth JWT authentication...")
                 self._get_oauth_token_jwt()
                 oauth_used = True
-                print("[OktaService] ✓ OAuth JWT authentication successful")
+                self.auth_method = "jwt"
+                print("[OktaService] OK: OAuth JWT authentication successful")
             except Exception as e:
-                print(f"[OktaService] ✗ OAuth JWT failed: {str(e)}")
+                print(f"[OktaService] FAILED: OAuth JWT failed: {str(e)}")
         elif self.client_id and self.client_secret:
             try:
                 print("[OktaService] Attempting OAuth client_secret authentication...")
                 self._get_oauth_token()
                 oauth_used = True
-                print("[OktaService] ✓ OAuth client_secret authentication successful")
+                self.auth_method = "client_secret"
+                print("[OktaService] OK: OAuth client_secret authentication successful")
             except Exception as e:
-                print(f"[OktaService] ✗ OAuth client_secret failed: {str(e)}")
+                print(f"[OktaService] FAILED: OAuth client_secret failed: {str(e)}")
 
         # Fallback to SSWS token if OAuth not used or failed
         if not oauth_used:
             if OKTA_API_TOKEN:
                 self.headers["Authorization"] = f"SSWS {OKTA_API_TOKEN}"
+                self.auth_method = "ssws"
                 print("[OktaService] Using SSWS API token for authentication")
             else:
                 raise Exception("No authentication method configured: provide OKTA_API_TOKEN or OAuth credentials")
+
+    def _refresh_token(self):
+        """Re-mint the OAuth access token. No-op for a static SSWS token."""
+        if self.auth_method == "jwt":
+            self._get_oauth_token_jwt()
+        elif self.auth_method == "client_secret":
+            self._get_oauth_token()
+
+    def _request(self, method: str, url: str, **kwargs) -> "requests.Response":
+        """Make an Okta API call, transparently refreshing an expired OAuth
+        token once and retrying if Okta responds with 401. Access tokens are
+        minted once at startup and expire after ~1hr with no other refresh
+        path, so long-running processes would otherwise fail every call."""
+        response = requests.request(method, url, headers=self.headers, **kwargs)
+        if response.status_code == 401 and self.auth_method in ("jwt", "client_secret"):
+            print(f"[OktaService] Got 401 from Okta - refreshing token and retrying: {url}")
+            try:
+                self._refresh_token()
+            except Exception as e:
+                print(f"[OktaService] Token refresh failed: {e}")
+                return response
+            response = requests.request(method, url, headers=self.headers, **kwargs)
+        return response
 
     def _get_oauth_token_jwt(self):
         """Exchange client credentials for access token using private_key_jwt"""
@@ -138,7 +165,7 @@ class OktaService:
         """Check if user exists by email. Returns (exists, user_id)"""
         try:
             url = f"{self.domain}/api/v1/users?search=profile.login eq \"{email}\""
-            response = requests.get(url, headers=self.headers)
+            response = self._request("GET", url)
             if response.status_code == 200:
                 users = response.json()
                 if users:
@@ -181,7 +208,7 @@ class OktaService:
             print(f"[create_user] Auth method: {'OAuth JWT' if self.access_token else 'SSWS Token'}")
             print(f"[create_user] User body: {user_body}")
 
-            response = requests.post(url, headers=self.headers, json=user_body)
+            response = self._request("POST", url, json=user_body)
             print(f"[create_user] Response status: {response.status_code}")
             print(f"[create_user] Response headers: {dict(response.headers)}")
             print(f"[create_user] Response text length: {len(response.text)}")
@@ -193,12 +220,12 @@ class OktaService:
                     user = response.json()
                     user_id = user.get('id')
                     if not user_id:
-                        print(f"[create_user] ✗ No user ID in response: {user}")
+                        print(f"[create_user] FAILED: No user ID in response: {user}")
                         return False, "", f"Error creating user: No user ID returned"
-                    print(f"[create_user] ✓ User created: {user_id}")
+                    print(f"[create_user] OK: User created: {user_id}")
                     return True, user_id, f"User {email} created successfully"
                 except Exception as json_err:
-                    print(f"[create_user] ✗ Failed to parse response JSON: {str(json_err)}")
+                    print(f"[create_user] FAILED: Failed to parse response JSON: {str(json_err)}")
                     print(f"[create_user] Response text: {response.text}")
                     return False, "", f"Error creating user: HTTP 200 but JSON parse failed: {str(json_err)}"
             else:
@@ -219,7 +246,7 @@ class OktaService:
                 if not error_text:
                     error_text = f"HTTP {response.status_code} - empty body"
 
-                print(f"[create_user] ✗ Okta API error (status {response.status_code}): {error_text}")
+                print(f"[create_user] FAILED: Okta API error (status {response.status_code}): {error_text}")
                 return False, "", f"Error creating user: [{response.status_code}] {error_text}"
         except Exception as e:
             import traceback
@@ -227,8 +254,8 @@ class OktaService:
             if not error_msg:
                 error_msg = f"Unknown error (exception type: {type(e).__name__}, no message)"
             tb = traceback.format_exc()
-            print(f"[create_user] ✗ Exception type: {type(e).__name__}")
-            print(f"[create_user] ✗ Exception: {error_msg}")
+            print(f"[create_user] FAILED: Exception type: {type(e).__name__}")
+            print(f"[create_user] FAILED: Exception: {error_msg}")
             print(f"[create_user] Traceback: {tb}")
             return False, "", f"Error creating user: {error_msg}"
 
@@ -236,7 +263,7 @@ class OktaService:
         """Add user to group. Returns (success, message)"""
         try:
             url = f"{self.domain}/api/v1/groups/{group_id}/users/{user_id}"
-            response = requests.put(url, headers=self.headers)
+            response = self._request("PUT", url)
 
             if response.status_code in [200, 204]:
                 return True, "User added to group successfully"
@@ -254,7 +281,7 @@ class OktaService:
         """Get all groups. Returns list of {id, name}"""
         try:
             url = f"{self.domain}/api/v1/groups"
-            response = requests.get(url, headers=self.headers)
+            response = self._request("GET", url)
 
             if response.status_code == 200:
                 groups = response.json()
@@ -275,7 +302,7 @@ class OktaService:
         """Get group ID by name"""
         try:
             url = f"{self.domain}/api/v1/groups?search=profile.name eq \"{group_name}\""
-            response = requests.get(url, headers=self.headers)
+            response = self._request("GET", url)
 
             if response.status_code == 200:
                 groups = response.json()

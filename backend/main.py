@@ -40,9 +40,9 @@ def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)) ->
 print("[Main] Initializing FastAPI application...")
 try:
     okta_service = OktaService()
-    print("[Main] ✓ OktaService initialized successfully")
+    print("[Main] OK: OktaService initialized successfully")
 except Exception as e:
-    print(f"[Main] ✗ Failed to initialize OktaService: {str(e)}")
+    print(f"[Main] FAILED: Failed to initialize OktaService: {str(e)}")
     print(f"[Main] Traceback: {traceback.format_exc()}")
     raise
 
